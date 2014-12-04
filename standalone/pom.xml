@@ -8,12 +8,12 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-    <artifactId>web</artifactId>
+    <artifactId>standalone</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>OS Project - Standalone</name>
-    <description>web</description>
+    <description>standalone</description>
 
     <dependencies>
         <dependency>
@@ -38,5 +38,31 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>edu.nccu.plsm.osproject.App</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -1,0 +1,90 @@
+# Maven
+target/
+*.diff
+
+# Eclipse
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# Eclipse - External tool builders
+.externalToolBuilders/
+
+# Eclipse - Locally stored "Eclipse launch configurations"
+*.launch
+
+# Eclipse - CDT-specific
+.cproject
+
+# Eclipse - PDT-specific
+.buildpath
+
+# Eclipse - Sbteclipse plugin 
+.target
+
+# Eclipse - TeXlipse plugin
+.texlipse
+
+# JetBrains - Directory-based project format
+.idea/
+
+# JetBrains - File-based project format
+*.ipr
+*.iml
+*.iws
+
+# JetBrains - Additional for IntelliJ
+out/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# Vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+# Linux
+*~
+
+# Mac OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Mac OS X - Icon must end with two \r
+Icon
+
+
+# Mac OS X - Thumbnails
+._*
+
+# Mac OS X - Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Mac OS X - Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
