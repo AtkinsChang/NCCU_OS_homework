@@ -1,5 +1,6 @@
 package edu.nccu.plsm.osproject.queue;
 
+import javax.ejb.Local;
 import java.util.concurrent.TimeUnit;
 
 public interface Configurable {

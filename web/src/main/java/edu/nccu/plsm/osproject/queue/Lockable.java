@@ -1,5 +1,7 @@
 package edu.nccu.plsm.osproject.queue;
 
+import javax.ejb.Local;
+
 public interface Lockable {
 
     public void acquirePutLock();

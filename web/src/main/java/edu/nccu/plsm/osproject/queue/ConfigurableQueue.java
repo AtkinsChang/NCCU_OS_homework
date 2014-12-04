@@ -4,6 +4,8 @@ import edu.nccu.plsm.osproject.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.Singleton;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import java.io.Serializable;
 import java.util.AbstractQueue;
 import java.util.Collection;
@@ -53,8 +55,8 @@ public class ConfigurableQueue<E> extends AbstractQueue<E>
     private final WrappedCondition notFull = WrappedCondition.wrap(putLock.newCondition());
     private final AtomicReference<Range> takeTimeRange;
     private final AtomicReference<Range> putTimeRange;
-    private final ExecutorService es = Executors.newCachedThreadPool();
-    private final Locker locker = new Locker(putLock, takeLock, es);
+    private final ExecutorService es;
+    private final Locker locker;
     /**
      * Head of linked list.
      * Invariant: head.item == null
@@ -74,8 +76,8 @@ public class ConfigurableQueue<E> extends AbstractQueue<E>
      * Creates a {@code LinkedBlockingQueue} with a capacity of
      * {@link Integer#MAX_VALUE}.
      */
-    public ConfigurableQueue() {
-        this(Integer.MAX_VALUE);
+    public ConfigurableQueue(ExecutorService es) {
+        this(es, Integer.MAX_VALUE);
     }
 
     /**
@@ -85,12 +87,14 @@ public class ConfigurableQueue<E> extends AbstractQueue<E>
      * @throws IllegalArgumentException if {@code capacity} is not greater
      *                                  than zero
      */
-    public ConfigurableQueue(int capacity) {
+    public ConfigurableQueue(ExecutorService es, int capacity) {
         if (capacity <= 0) throw new IllegalArgumentException();
         this.capacity = new AtomicInteger(capacity);
         this.takeTimeRange = new AtomicReference<>(new Range(0L, 0L));
         this.putTimeRange = new AtomicReference<>(new Range(0L, 0L));
         last = head = new Node<>(null);
+        this.es = es;
+        this.locker = new Locker(putLock, takeLock, es);
     }
 
     /**
@@ -103,8 +107,8 @@ public class ConfigurableQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified collection or any
      *                              of its elements are null
      */
-    public ConfigurableQueue(Collection<? extends E> c) {
-        this(Integer.MAX_VALUE);
+    public ConfigurableQueue(ExecutorService es, Collection<? extends E> c) {
+        this(es, Integer.MAX_VALUE);
         final ReentrantLock putLock = this.putLock;
         putLock.lock(); // Never contended, but necessary for visibility
         try {
@@ -169,27 +173,6 @@ public class ConfigurableQueue<E> extends AbstractQueue<E>
         }
     }
 
-    /*
-        @Override
-        public int getMaxTakeTime() {
-            return getMaxTakeTime(TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public int getMinTakeTime() {
-            return getMinTakeTime(TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public int getMaxPutTime() {
-            return getMaxPutTime(TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public int getMinPutTime() {
-            return getMinPutTime(TimeUnit.MILLISECONDS);
-        }
-    */
     @Override
     public int getMaxTakeTime(TimeUnit unit) {
         return this.takeTimeRange.get().getMax();
