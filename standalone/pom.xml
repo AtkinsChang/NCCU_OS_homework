@@ -17,6 +17,37 @@
 
     <dependencies>
         <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>queue</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>task</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>producer</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>consumer</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>management</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>compile</scope>

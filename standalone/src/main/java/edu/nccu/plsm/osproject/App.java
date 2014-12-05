@@ -1,30 +1,45 @@
 package edu.nccu.plsm.osproject;
 
-import edu.nccu.plsm.osproject.jmx.Control;
-import edu.nccu.plsm.osproject.jmx.ControlMBean;
-import edu.nccu.plsm.osproject.jmx.QueueConfig;
-import edu.nccu.plsm.osproject.jmx.QueueConfigMBean;
-import edu.nccu.plsm.osproject.queue.ConfigurableQueue;
-import edu.nccu.plsm.osproject.task.Task;
+import edu.nccu.plsm.osproject.management.Control;
+import edu.nccu.plsm.osproject.management.ControlMBean;
+import edu.nccu.plsm.osproject.management.queue.QueueInfo;
+import edu.nccu.plsm.osproject.management.queue.QueueInfoMBean;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
+import edu.nccu.plsm.osproject.task.api.Task;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        ExecutorService es = Executors.newCachedThreadPool();
-        ConfigurableQueue<Task> queue = new ConfigurableQueue<>();
-
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ThreadFactory producerThreadFactory = new BasicThreadFactory.Builder()
+                .namingPattern("producer-thread-%d")
+                .build();
+        ExecutorService pes = Executors.newCachedThreadPool(producerThreadFactory);
 
-        QueueConfigMBean queueBean = new QueueConfig(queue);
-        ControlMBean controlMBean = new Control(queue, es);
+        ThreadFactory consumerThreadFactory = new BasicThreadFactory.Builder()
+                .namingPattern("consumer-thread-%d")
+                .build();
+        ExecutorService ces = Executors.newCachedThreadPool(consumerThreadFactory);
+
+        ThreadFactory lockThreadFactory = new BasicThreadFactory.Builder()
+                .namingPattern("lock-thread-%d")
+                .build();
+        ExecutorService qes = Executors.newCachedThreadPool(lockThreadFactory);
+
+        OSProjectQueue<Task> queue = new OSProjectQueue<>(Integer.MAX_VALUE, qes);
+
+        QueueInfoMBean queueBean = new QueueInfo(queue);
+        ControlMBean controlMBean = new Control(queue, pes, ces);
         try {
-            ObjectName queueMBeanName = new ObjectName("App:name=Queue");
-            ObjectName controlMBeanName = new ObjectName("App:name=Control");
+            ObjectName queueMBeanName = new ObjectName("OS.Project:service=queue,name=QueueInfo");
+            ObjectName controlMBeanName = new ObjectName("OS.Project:name=Control");
 
             mbs.registerMBean(queueBean, queueMBeanName);
             mbs.registerMBean(controlMBean, controlMBeanName);
