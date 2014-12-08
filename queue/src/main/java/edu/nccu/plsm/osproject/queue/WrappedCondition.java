@@ -6,14 +6,11 @@ import java.util.concurrent.locks.Condition;
 
 public class WrappedCondition implements Condition {
 
-    Condition condition;
+    private final Condition condition;
 
-    private WrappedCondition() {
-        super();
-    }
 
     private WrappedCondition(Condition condition) {
-        this();
+        super();
         this.condition = condition;
     }
 

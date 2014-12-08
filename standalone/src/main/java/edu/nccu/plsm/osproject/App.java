@@ -1,15 +1,12 @@
 package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.management.Control;
-import edu.nccu.plsm.osproject.management.ControlMBean;
 import edu.nccu.plsm.osproject.management.queue.QueueInfo;
-import edu.nccu.plsm.osproject.management.queue.QueueInfoMBean;
-import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import edu.nccu.plsm.osproject.task.api.Task;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,8 +32,13 @@ public class App {
 
         OSProjectQueue<Task> queue = new OSProjectQueue<>(Integer.MAX_VALUE, qes);
 
-        QueueInfoMBean queueBean = new QueueInfo(queue);
-        ControlMBean controlMBean = new Control(queue, pes, ces);
+        QueueInfo queueBean = new QueueInfo();
+        queueBean.setQueue(queue);
+        queueBean.init();
+        Control controlMBean = new Control();
+        controlMBean.setQueue(queue);
+        controlMBean.init(pes, ces);
+        /*
         try {
             ObjectName queueMBeanName = new ObjectName("OS.Project:service=queue,name=QueueInfo");
             ObjectName controlMBeanName = new ObjectName("OS.Project:name=Control");
@@ -45,7 +47,7 @@ public class App {
             mbs.registerMBean(controlMBean, controlMBeanName);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
         controlMBean.addNewProducer("p1");
         controlMBean.addNewConsumer("c1");
 

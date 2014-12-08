@@ -25,6 +25,10 @@ public class SimpleTask implements Task {
         return creatorName;
     }
 
+    public int getTimeNeeded() {
+        return timeNeeded;
+    }
+
     public int getTurnaroundTime() {
         return this.turnaroundTime;
     }

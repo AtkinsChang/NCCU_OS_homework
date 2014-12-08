@@ -4,13 +4,12 @@
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-30(%d{yy/MM/dd HH:mm:ss.SSS} %highlight(%-5level) [%thread]) %logger{50}: %X{name} - %m%n
+            <pattern>%-30(%d{yy/MM/dd HH:mm:ss.SSS} %-5level [%thread]) %logger{50}: %X{name}%m%n
             </pattern>
         </encoder>
-        <withJansi>true</withJansi>
     </appender>
 
-    <root level="DEBUG">
+    <root level="TRACE">
         <appender-ref ref="console"/>
     </root>
 </configuration>

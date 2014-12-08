@@ -4,7 +4,11 @@ import edu.nccu.plsm.osproject.task.TaskNotCompleteException;
 
 public interface Task {
 
-    public String getCreatorName();
+    String getCreatorName();
+
+    int getTimeNeeded();
+
+    int getTurnaroundTime();
 
     void doTask(int efficiency) throws TaskNotCompleteException;
 

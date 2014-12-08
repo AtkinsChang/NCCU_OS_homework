@@ -1,52 +1,40 @@
 package edu.nccu.plsm.osproject.queue;
 
-import edu.nccu.plsm.osproject.queue.jmx.Control;
-import edu.nccu.plsm.osproject.queue.jmx.ControlMBean;
-import edu.nccu.plsm.osproject.queue.jmx.QueueConfig;
-import edu.nccu.plsm.osproject.queue.jmx.QueueConfigMBean;
-import edu.nccu.plsm.osproject.queue.queue.ConfigurableQueue;
-import edu.nccu.plsm.osproject.task.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableList;
+import edu.nccu.plsm.osproject.queue.message.entity.ConsumerJson;
+import edu.nccu.plsm.osproject.queue.message.entity.ProducerJson;
+import edu.nccu.plsm.osproject.queue.message.entity.QueueJson;
+import edu.nccu.plsm.osproject.queue.message.entity.TaskJson;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Singleton;
-import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
+import javax.ejb.Local;
 
-@Singleton
-public class OSProjectBean {
+@Local
+public interface OSProjectBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OSProjectBean.class);
-    @Resource
-    private ManagedExecutorService managedExecutorService;
-    private ConfigurableQueue<Task> queue;
+    public QueueJson getQueueJson();
 
-    @PostConstruct
-    private void init() {
-        queue = new ConfigurableQueue<>(managedExecutorService);
-        MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-        try {
-            ObjectName queueMBeanName = new ObjectName("OSProjectBean:name=Queue");
-            ObjectName controlMBeanName = new ObjectName("OSProjectBean:name=Control");
+    ImmutableList<TaskJson> getTaskJson();
 
-            QueueConfigMBean queueBean = new QueueConfig(queue);
-            ControlMBean controlMBean = new Control(queue, managedExecutorService);
+    ImmutableList<ConsumerJson> getConsumerJson();
 
-            platformMBeanServer.registerMBean(queueBean, queueMBeanName);
-            platformMBeanServer.registerMBean(controlMBean, controlMBeanName);
-        } catch (MalformedObjectNameException
-                |NotCompliantMBeanException
-                |InstanceAlreadyExistsException
-                |MBeanRegistrationException e) {
-            LOGGER.error("init error", e);
-        }
-    }
+    ImmutableList<ProducerJson> getProducerJson();
+
+    void updateConsumer(String name, int efficiency);
+
+    void shutdownConsumer(String name, boolean mayInterruptIfRunning);
+
+    void updateProducer(String name, int pMin, int pMax, int tMin, int tMax);
+
+    void shutdownProducer(String name, boolean mayInterruptIfRunning);
+
+    void updateQueue(int capacity, int pMin, int pMax, int tMin, int tMax);
+
+    void lockTake();
+
+    void unlockTake();
+
+    void lockPut();
+
+    void unlockPut();
+
 }

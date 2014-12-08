@@ -2,8 +2,11 @@ package edu.nccu.plsm.osproject.queue;
 
 import edu.nccu.plsm.osproject.queue.api.Configurable;
 import edu.nccu.plsm.osproject.queue.api.ConsumerBuffer;
+import edu.nccu.plsm.osproject.queue.api.ConsumerStateHelper;
 import edu.nccu.plsm.osproject.queue.api.Lockable;
+import edu.nccu.plsm.osproject.queue.api.Monitorable;
 import edu.nccu.plsm.osproject.queue.api.ProducerBuffer;
+import edu.nccu.plsm.osproject.queue.api.ProducerStateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +27,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+
 /**
  * Modified {@link java.util.concurrent.LinkedBlockingQueue} for demo usage
  *
  * @param <E> the type of elements held in this collection
  */
 public class OSProjectQueue<E> extends AbstractQueue<E> implements
-        Configurable, Lockable,
+        Configurable, Lockable, Monitorable,
         ProducerBuffer<E>, ConsumerBuffer<E>,
         BlockingQueue<E>, Serializable {
 
@@ -145,40 +149,40 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     //lockable-------------------------------------------------------------------
 
     @Override
-    public void acquirePutLock() {
+    public synchronized void acquirePutLock() {
         queueLocker.lockPut();
     }
 
     @Override
-    public void releasePutLock() {
+    public synchronized void releasePutLock() {
         queueLocker.unlockPut();
     }
 
     @Override
-    public void acquireTakeLock() {
+    public synchronized void acquireTakeLock() {
         queueLocker.lockTake();
     }
 
     @Override
-    public void releaseTakeLock() {
+    public synchronized void releaseTakeLock() {
         queueLocker.unlockTake();
     }
 
     //config-------------------------------------------------------------------
 
     @Override
-    public void setTakeTime(int min, int max, TimeUnit unit) {
+    public synchronized void setTakeTime(int min, int max, TimeUnit unit) {
         this.takeTimeRange.set(new TimeRange(unit.toMillis(min), unit.toMillis(max)));
     }
 
     @Override
-    public void setPutTime(int min, int max, TimeUnit unit) {
+    public synchronized void setPutTime(int min, int max, TimeUnit unit) {
         this.putTimeRange.set(new TimeRange(unit.toMillis(min), unit.toMillis(max)));
 
     }
 
     @Override
-    public int getCapacity() {
+    public synchronized int getCapacity() {
         return this.capacity.get();
     }
 
@@ -193,23 +197,49 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     }
 
     @Override
-    public int getMaxTakeTime(TimeUnit unit) {
+    public synchronized int getMaxTakeTime(TimeUnit unit) {
         return this.takeTimeRange.get().getMax();
     }
 
     @Override
-    public int getMinTakeTime(TimeUnit unit) {
+    public synchronized int getMinTakeTime(TimeUnit unit) {
         return this.takeTimeRange.get().getMin();
     }
 
     @Override
-    public int getMaxPutTime(TimeUnit unit) {
+    public synchronized int getMaxPutTime(TimeUnit unit) {
         return this.putTimeRange.get().getMax();
     }
 
     @Override
-    public int getMinPutTime(TimeUnit unit) {
+    public synchronized int getMinPutTime(TimeUnit unit) {
         return this.putTimeRange.get().getMin();
+    }
+
+    @Override
+    public synchronized boolean getPutLockState() {
+        if (!putLock.isHeldByCurrentThread()) {
+            try {
+                return !putLock.tryLock();
+            } finally {
+                putLock.unlock();
+            }
+        } else {
+            return Boolean.TRUE;
+        }
+    }
+
+    @Override
+    public synchronized boolean getTakeLockState() {
+        if (!takeLock.isHeldByCurrentThread()) {
+            try {
+                return !takeLock.tryLock();
+            } finally {
+                takeLock.unlock();
+            }
+        } else {
+            return Boolean.TRUE;
+        }
     }
 
     //Queue-------------------------------------------------------------------
@@ -299,7 +329,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
      * (in the absence of memory or resource constraints) accept without
      * blocking. This is always equal to the initial capacity of this queue
      * less the current {@code size} of this queue.
-     * <p>
+     * <p/>
      * <p>Note that you <em>cannot</em> always tell if an attempt to insert
      * an element will succeed by inspecting {@code remainingCapacity}
      * because it may be the case that another thread is about to
@@ -338,11 +368,10 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 notFull.await();
             }
             es.submit(() -> {
-                Thread.currentThread().setName("putting-lock-thread");
                 try {
                     Thread.sleep(putTimeRange.get().random());
                 } catch (InterruptedException es) {
-                    LOGGER.error("Put interrupted",es);
+                    LOGGER.error("Put interrupted", es);
                 }
             }).get();
             enqueue(node);
@@ -351,6 +380,50 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 notFull.signal();
         } catch (ExecutionException e1) {
             LOGGER.error("Put error", e1);
+        } finally {
+            putLock.unlock();
+        }
+        if (c == 0)
+            signalNotEmpty();
+    }
+
+    public void put(ProducerStateHelper producer, E e) throws InterruptedException {
+        if (e == null) throw new NullPointerException();
+        // Note: convention in all put/take/etc is to preset local var
+        // holding count negative to indicate failure unless set.
+        int c = -1;
+        Node<E> node = new Node<E>(e);
+        final ReentrantLock putLock = this.putLock;
+        final AtomicInteger count = this.count;
+        putLock.lockInterruptibly();
+        try {
+            /*
+             * Note that count is used in wait guard even though it is
+             * not protected by lock. This works because count can
+             * only decrease at this point (all other puts are shut
+             * out by lock), and we (or some other waiting put) are
+             * signalled if it ever changes from capacity. Similarly
+             * for all other uses of count in other wait guards.
+             */
+            while (count.get() >= capacity.get()) {
+                producer.setWaitingNotFull();
+                notFull.await();
+            }
+            producer.setPutting();
+            es.submit(() -> {
+                try {
+                    Thread.sleep(putTimeRange.get().random());
+                } catch (InterruptedException es) {
+                    LOGGER.error("Put interrupted", es);
+                }
+            }).get();
+            enqueue(node);
+            c = count.getAndIncrement();
+            if (c + 1 < capacity.get())
+                notFull.signal();
+        } catch (ExecutionException e1) {
+            LOGGER.error("Put error");
+            throw new QueueOperationException(e1);
         } finally {
             putLock.unlock();
         }
@@ -442,7 +515,6 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 notEmpty.await();
             }
             es.submit(() -> {
-                Thread.currentThread().setName("taking-lock-thread");
                 try {
                     Thread.sleep(this.takeTimeRange.get().random());
                 } catch (InterruptedException es) {
@@ -456,6 +528,41 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
         } catch (ExecutionException ee) {
             LOGGER.error("Take error", ee);
             return this.take();
+        } finally {
+            takeLock.unlock();
+        }
+        if (c >= capacity.get())
+            signalNotFull();
+        return x;
+    }
+
+    @Override
+    public E take(ConsumerStateHelper consumer) throws InterruptedException {
+        E x;
+        int c = -1;
+        final AtomicInteger count = this.count;
+        final ReentrantLock takeLock = this.takeLock;
+        takeLock.lockInterruptibly();
+        try {
+            while (count.get() == 0) {
+                consumer.setWaitingNotEmpty();
+                notEmpty.await();
+            }
+            consumer.setTaking();
+            es.submit(() -> {
+                try {
+                    Thread.sleep(this.takeTimeRange.get().random());
+                } catch (InterruptedException es) {
+                    LOGGER.error("Take interrupted", es);
+                }
+            }).get();
+            x = dequeue();
+            c = count.getAndDecrement();
+            if (c > 1)
+                notEmpty.signal();
+        } catch (ExecutionException e1) {
+            LOGGER.error("Take error", e1);
+            throw new QueueOperationException(e1);
         } finally {
             takeLock.unlock();
         }
@@ -600,11 +707,11 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     /**
      * Returns an array containing all of the elements in this queue, in
      * proper sequence.
-     * <p>
+     * <p/>
      * <p>The returned array will be "safe" in that no references to it are
      * maintained by this queue.  (In other words, this method must allocate
      * a new array).  The caller is thus free to modify the returned array.
-     * <p>
+     * <p/>
      * <p>This method acts as bridge between array-based and collection-based
      * APIs.
      *
@@ -630,23 +737,23 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
      * the specified array.  If the queue fits in the specified array, it
      * is returned therein.  Otherwise, a new array is allocated with the
      * runtime type of the specified array and the size of this queue.
-     * <p>
+     * <p/>
      * <p>If this queue fits in the specified array with room to spare
      * (i.e., the array has more elements than this queue), the element in
      * the array immediately following the end of the queue is set to
      * {@code null}.
-     * <p>
+     * <p/>
      * <p>Like the {@link #toArray()} method, this method acts as bridge between
      * array-based and collection-based APIs.  Further, this method allows
      * precise control over the runtime type of the output array, and may,
      * under certain circumstances, be used to save allocation costs.
-     * <p>
+     * <p/>
      * <p>Suppose {@code x} is a queue known to contain only strings.
      * The following code can be used to dump the queue into a newly
      * allocated array of {@code String}:
-     * <p>
+     * <p/>
      * <pre> {@code String[] y = x.toArray(new String[0]);}</pre>
-     * <p>
+     * <p/>
      * Note that {@code toArray(new Object[0])} is identical in function to
      * {@code toArray()}.
      *
@@ -782,7 +889,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     /**
      * Returns an iterator over the elements in this queue in proper sequence.
      * The elements will be returned in order from first (head) to last (tail).
-     * <p>
+     * <p/>
      * <p>The returned iterator is
      * <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
      *
@@ -794,10 +901,10 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
 
     /**
      * Returns a {@link java.util.Spliterator} over the elements in this queue.
-     * <p>
+     * <p/>
      * <p>The returned spliterator is
      * <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
-     * <p>
+     * <p/>
      * <p>The {@code Spliterator} reports {@link java.util.Spliterator#CONCURRENT},
      * {@link java.util.Spliterator#ORDERED}, and {@link java.util.Spliterator#NONNULL}.
      *
@@ -1029,7 +1136,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
 
         /**
          * Returns the next live successor of p, or null if no such.
-         * <p>
+         * <p/>
          * Unlike other traversal methods, iterators need to handle both:
          * - dequeued nodes (p.next == p)
          * - (possibly multiple) interior removed nodes (p.item == null)

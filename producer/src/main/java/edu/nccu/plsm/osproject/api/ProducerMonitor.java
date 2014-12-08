@@ -4,6 +4,8 @@ public interface ProducerMonitor {
 
     String getName();
 
+    int getState();
+
     void shutdownGracefully();
 
     long getTaskCreationCount();

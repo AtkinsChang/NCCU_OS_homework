@@ -1,7 +1,5 @@
 package edu.nccu.plsm.osproject.management.consumer;
 
-import edu.nccu.plsm.osproject.api.ConsumerMonitor;
-
 public interface ConsumerInfoMBean {
 
     String getName();

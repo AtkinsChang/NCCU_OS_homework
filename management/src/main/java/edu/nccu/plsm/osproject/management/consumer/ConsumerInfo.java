@@ -24,7 +24,6 @@ public class ConsumerInfo implements ConsumerInfoMBean {
     public ConsumerInfo(ConsumerMonitor consumerMonitor) {
         super();
         this.consumerMonitor = consumerMonitor;
-        MDC.put("name", consumerMonitor.getName());
     }
 
     public void setFuture(Future<?> f) {

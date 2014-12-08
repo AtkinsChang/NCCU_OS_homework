@@ -12,20 +12,69 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>OS Project - Standalone</name>
+    <name>OS Project - Web</name>
     <description>web</description>
 
     <dependencies>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>queue</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>task</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>producer</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>consumer</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.nccu.plsm.osproject</groupId>
+            <artifactId>management</artifactId>
+            <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.tyrus.bundles</groupId>
+            <artifactId>websocket-ri-bundle</artifactId>
+            <version>1.9</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -43,5 +92,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

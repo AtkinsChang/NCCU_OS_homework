@@ -6,12 +6,18 @@ import edu.nccu.plsm.osproject.management.consumer.ConsumerInfo;
 import edu.nccu.plsm.osproject.management.consumer.ConsumerInfoMBean;
 import edu.nccu.plsm.osproject.management.producer.ProducerInfo;
 import edu.nccu.plsm.osproject.management.producer.ProducerInfoMBean;
-import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import edu.nccu.plsm.osproject.task.api.Task;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import javax.ejb.Stateless;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -20,21 +26,73 @@ import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 
-public class Control implements ControlMBean {
+@Stateless(name = "ejb/Control")
+public class Control implements ControlEJB {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Control.class);
     private static final MBeanServer M_BEAN_SERVER = ManagementFactory.getPlatformMBeanServer();
+    private static final ObjectName NAME;
 
-    private final OSProjectQueue<Task> queue;
-    private final ExecutorService producerPool;
-    private final ExecutorService consumerPool;
-
-    public Control(OSProjectQueue<Task> queue, ExecutorService producerPool, ExecutorService consumerPool) {
-        this.queue = queue;
-        this.producerPool = producerPool;
-        this.consumerPool = consumerPool;
+    static {
+        ObjectName name = null;
+        try {
+            name = new ObjectName("OS.Project:name=Control");
+        } catch (MalformedObjectNameException ignored) {
+        }
+        NAME = name;
     }
 
+    private OSProjectQueue<Task> queue;
+    private ExecutorService producerPool;
+    private ExecutorService consumerPool;
+
+    @Resource
+    private ManagedExecutorService es;
+
+    public Control() {
+        super();
+    }
+
+    @PostConstruct
+    private void initBean() {
+        LOGGER.debug("Initializing {}...", getClass().getSimpleName());
+        this.producerPool = es;
+        this.consumerPool = es;
+        register();
+    }
+
+    @PreDestroy
+    private void onShutdown() {
+        LOGGER.debug("Shutting down {}...", getClass().getSimpleName());
+        try {
+            MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+            platformMBeanServer.unregisterMBean(NAME);
+        } catch (InstanceNotFoundException | MBeanRegistrationException e) {
+            LOGGER.info("Shutdown error", e);
+        }
+    }
+
+    private void register() {
+        LOGGER.debug("Registering {}...", getClass().getSimpleName());
+        try {
+            MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+            platformMBeanServer.registerMBean(this, NAME);
+        } catch (NotCompliantMBeanException
+                | InstanceAlreadyExistsException
+                | MBeanRegistrationException e) {
+            LOGGER.error("Register error", e);
+        }
+    }
+
+    public void init(ExecutorService producerPool, ExecutorService consumerPool) {
+        this.producerPool = producerPool;
+        this.consumerPool = consumerPool;
+        register();
+    }
+
+    public void setQueue(OSProjectQueue<Task> queue) {
+        this.queue = queue;
+    }
 
     @Override
     public void acquirePutLock() {
@@ -58,6 +116,7 @@ public class Control implements ControlMBean {
 
     @Override
     public void addNewProducer(String name) {
+        LOGGER.info("Add producer: {}", name);
         Producer producer = new Producer(name, queue);
         ProducerInfoMBean producerMBean = new ProducerInfo(producer);
         try {
@@ -69,11 +128,14 @@ public class Control implements ControlMBean {
         } catch (InstanceAlreadyExistsException e) {
             LOGGER.warn("Producer name already exist", e);
             throw new IllegalArgumentException("Duplicate name", e);
+        } catch (Exception e) {
+            LOGGER.error("Internal Error", e);
         }
     }
 
     @Override
     public void addNewConsumer(String name) {
+        LOGGER.info("Add consumer {}", name);
         Consumer consumer = new Consumer(name, queue);
         ConsumerInfoMBean consumerMBean = new ConsumerInfo(consumer);
         try {
@@ -84,6 +146,8 @@ public class Control implements ControlMBean {
             LOGGER.error("Internal Error", e);
         } catch (InstanceAlreadyExistsException e) {
             LOGGER.warn("Consumer name already exist", e);
+        } catch (Exception e) {
+            LOGGER.error("Internal Error", e);
         }
     }
 

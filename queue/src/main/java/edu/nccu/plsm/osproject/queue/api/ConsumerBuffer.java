@@ -1,7 +1,9 @@
 package edu.nccu.plsm.osproject.queue.api;
 
-public interface ConsumerBuffer<E> extends ProducerBuffer<E> {
+public interface ConsumerBuffer<E> {
 
-    E take() throws InterruptedException;
+    E take(ConsumerStateHelper consumer) throws InterruptedException;
+
+    void put(E e) throws InterruptedException;
 
 }

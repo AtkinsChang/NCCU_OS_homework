@@ -1,8 +1,12 @@
 package edu.nccu.plsm.osproject.management.queue;
 
-import java.util.concurrent.TimeUnit;
+import edu.nccu.plsm.osproject.management.task.TaskInfoMBean;
 
-public interface QueueInfoMBean {
+import java.util.Set;
+
+public interface QueueInfoMXBean {
+
+    Set<TaskInfoMBean> getQueue();
 
     int getCapacity();
 
@@ -23,5 +27,9 @@ public interface QueueInfoMBean {
     int getMaxPutTime();
 
     int getMinPutTime();
+
+    boolean getPutLockState();
+
+    boolean getTakeLockState();
 
 }

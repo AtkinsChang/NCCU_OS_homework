@@ -4,6 +4,8 @@ public interface ConsumerMonitor {
 
     String getName();
 
+    int getState();
+
     long getTaskExecutionCount();
 
     void shutdownGracefully();

@@ -24,7 +24,6 @@ public class ProducerInfo implements ProducerInfoMBean {
     public ProducerInfo(ProducerMonitor producerMonitor) {
         super();
         this.producerMonitor = producerMonitor;
-        MDC.put("name", producerMonitor.getName());
     }
 
     public void setFuture(Future<?> f) {

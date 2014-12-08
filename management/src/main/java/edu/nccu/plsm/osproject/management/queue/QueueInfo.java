@@ -1,67 +1,150 @@
 package edu.nccu.plsm.osproject.management.queue;
 
-import edu.nccu.plsm.osproject.queue.api.Configurable;
+import com.google.common.collect.ImmutableSet;
+import edu.nccu.plsm.osproject.management.task.TaskInfo;
+import edu.nccu.plsm.osproject.management.task.TaskInfoMBean;
+import edu.nccu.plsm.osproject.task.api.Task;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Stateful;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class QueueInfo implements QueueInfoMBean {
+@Stateful(name = "ejb/QueueInfo")
+public class QueueInfo implements QueueInfoEJB {
 
-    private final Configurable configurable;
-    private final TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueueInfo.class);
+    private static final TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+    private static final ObjectName NAME;
 
-    public QueueInfo(Configurable configurable) {
+    static {
+        ObjectName name = null;
+        try {
+            name = new ObjectName("OS.Project:service=queue,name=QueueInfo");
+        } catch (MalformedObjectNameException e) {
+            LOGGER.error("init error", e);
+        }
+        NAME = name;
+    }
+
+    private OSProjectQueue<Task> queue;
+
+    public QueueInfo() {
         super();
-        this.configurable = configurable;
+    }
+
+    @PostConstruct
+    public void initBean() {
+        LOGGER.info("Initializing {}...", getClass().getSimpleName());
+        init();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        LOGGER.debug("Shutting down {}...", getClass().getSimpleName());
+        try {
+            MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+            platformMBeanServer.unregisterMBean(NAME);
+        } catch (InstanceNotFoundException | MBeanRegistrationException e) {
+            LOGGER.info("Shutdown error", e);
+        }
+    }
+
+    public void init() {
+        LOGGER.info("Registering {}...", getClass().getSimpleName());
+        try {
+            MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+            platformMBeanServer.registerMBean(this, NAME);
+        } catch (NotCompliantMBeanException
+                | InstanceAlreadyExistsException
+                | MBeanRegistrationException e) {
+            LOGGER.error("register error", e);
+        }
+    }
+
+    @Override
+    public Set<TaskInfoMBean> getQueue() {
+        ImmutableSet.Builder<TaskInfoMBean> setBuilder = ImmutableSet.builder();
+        for (Task t : queue) {
+            setBuilder.add(new TaskInfo(t));
+        }
+        return setBuilder.build();
+    }
+
+    public void setQueue(OSProjectQueue<Task> queue) {
+        this.queue = queue;
     }
 
     @Override
     public int getCapacity() {
-        return configurable.getCapacity();
+        return queue.getCapacity();
     }
 
     @Override
     public void setCapacity(int size) {
-        configurable.setCapacity(size);
+        queue.setCapacity(size);
     }
 
     @Override
     public int getRemainingCapacity() {
-        return configurable.remainingCapacity();
+        return queue.remainingCapacity();
     }
 
     @Override
     public int getMaxTakeTime() {
-        return configurable.getMaxTakeTime(timeUnit);
+        return queue.getMaxTakeTime(timeUnit);
     }
 
     @Override
     public int getMinTakeTime() {
-        return configurable.getMinTakeTime(timeUnit);
+        return queue.getMinTakeTime(timeUnit);
     }
 
     @Override
     public void setTakeTime(int min, int max) {
-        configurable.setTakeTime(min, max, timeUnit);
+        queue.setTakeTime(min, max, timeUnit);
     }
 
     @Override
     public int getMaxPutTime() {
-        return configurable.getMaxPutTime(timeUnit);
+        return queue.getMaxPutTime(timeUnit);
     }
 
     @Override
     public int getMinPutTime() {
-        return configurable.getMinPutTime(timeUnit);
+        return queue.getMinPutTime(timeUnit);
+    }
+
+    @Override
+    public boolean getPutLockState() {
+        return queue.getPutLockState();
+    }
+
+    @Override
+    public boolean getTakeLockState() {
+        return queue.getTakeLockState();
     }
 
     @Override
     public void setPutTime(int min, int max) {
-        configurable.setPutTime(min, max, timeUnit);
+        queue.setPutTime(min, max, timeUnit);
     }
 
     @Override
     public int getUsedCapacity() {
-        return configurable.size();
+        return queue.size();
     }
 
 }
