@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import edu.nccu.plsm.osproject.Consumer;
 import edu.nccu.plsm.osproject.Producer;
 import edu.nccu.plsm.osproject.api.ProducerMonitor;
-import edu.nccu.plsm.osproject.task.api.Task;
 import edu.nccu.plsm.osproject.queue.message.entity.ConsumerJson;
 import edu.nccu.plsm.osproject.queue.message.entity.ProducerJson;
 import edu.nccu.plsm.osproject.queue.message.entity.QueueJson;
 import edu.nccu.plsm.osproject.queue.message.entity.TaskJson;
+import edu.nccu.plsm.osproject.task.api.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +39,12 @@ public class OSProject implements OSProjectBean {
     private ManagedExecutorService producerPool;
     @Resource(lookup = "concurrent/OSProject/consumer")
     private ManagedExecutorService consumerPool;
-/*
-    @EJB(name = "ejb/Control")
-    private ControlEJB control;
-    @EJB(name = "ejb/QueueInfo")
-    private QueueInfoEJB queueInfo;
-    */
+    /*
+        @EJB(name = "ejb/Control")
+        private ControlEJB control;
+        @EJB(name = "ejb/QueueInfo")
+        private QueueInfoEJB queueInfo;
+        */
     private OSProjectQueue<Task> queue;
     private Map<String, ConsumerExecutingInfo> consumers;
     private Map<String, ProducerExecutingInfo> producers;
@@ -56,18 +56,18 @@ public class OSProject implements OSProjectBean {
         consumers = new HashMap<>();
         producers = new HashMap<>();
         queue.setCapacity(100);
-       //control.setQueue(queue);
-       // queueInfo.setQueue(queue);
+        //control.setQueue(queue);
+        // queueInfo.setQueue(queue);
         queue.acquirePutLock();
     }
 
     @PreDestroy
     private void shutdown() {
         LOGGER.info("Destroying...");
-        for(ConsumerExecutingInfo c : consumers.values()) {
+        for (ConsumerExecutingInfo c : consumers.values()) {
             c.getFuture().cancel(true);
         }
-        for(ProducerExecutingInfo p : producers.values()) {
+        for (ProducerExecutingInfo p : producers.values()) {
             p.getFuture().cancel(true);
         }
         queue.releasePutLock();
@@ -126,14 +126,14 @@ public class OSProject implements OSProjectBean {
     public void shutdownConsumer(String name, boolean mayInterruptIfRunning) {
         ConsumerExecutingInfo c = consumers.remove(name);
         if (c != null) {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("{} shutdown consumer {}", mayInterruptIfRunning?"force":"gracefully", name);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("{} shutdown consumer {}", mayInterruptIfRunning ? "force" : "gracefully", name);
             }
             c.getConsumerMonitor().shutdownGracefully();
             c.getFuture().cancel(mayInterruptIfRunning);
         } else {
             LOGGER.info("Consumer {} not found", name);
-            throw  new EJBException(name + " not found");
+            throw new EJBException(name + " not found");
         }
     }
 
@@ -161,12 +161,12 @@ public class OSProject implements OSProjectBean {
     public void shutdownProducer(String name, boolean mayInterruptIfRunning) {
         ProducerExecutingInfo p = producers.remove(name);
         if (p != null) {
-            LOGGER.info("{} shutdown producer {}", mayInterruptIfRunning?"force":"gracefully", name);
+            LOGGER.info("{} shutdown producer {}", mayInterruptIfRunning ? "force" : "gracefully", name);
             p.getProducerMonitor().shutdownGracefully();
             p.getFuture().cancel(mayInterruptIfRunning);
         } else {
             LOGGER.info("Producer {} not found", name);
-            throw  new EJBException(name + " not found");
+            throw new EJBException(name + " not found");
         }
     }
 

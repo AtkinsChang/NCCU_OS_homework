@@ -1,97 +1,27 @@
-
-
-
-
-
 /**
  *  web socket
  */
-var wsocket;
-var consumerState = {
-    "0": {
-        "name": "Initializing",
-        "class": ""
-    },
-    "1": {
-        "name": "Waiting for Lock",
-        "class": "list-group-item-warning"
-    },
-    "2": {
-        "name": "Waiting for NotEmpty Condition",
-        "class": "list-group-item-info"
-    },
-    "3": {
-        "name": "Locking, Taking Task from Queue",
-        "class": "list-group-item-danger"
-    },
-    "10": {
-        "name": "Executing Task",
-        "class": "list-group-item-success"
-    },
-    "20": {
-        "name": "Shutdown",
-        "class": ""
-    },
-    "30": {
-        "name": "Rollback",
-        "class": "list-group-item-danger"
-    }
-};
-var producerState = {
-    "0": {
-        "name": "Initializing",
-        "class": ""
-    },
-    "1": {
-        "name": "Waiting for Lock",
-        "class": "list-group-item-warning"
-    },
-    "2": {
-        "name": "Waiting for NotFull Condition",
-        "class": "list-group-item-info"
-    },
-    "3": {
-        "name": "Locking, Putting Task to Queue",
-        "class": "list-group-item-danger"
-    },
-    "10": {
-        "name": "Creating Task",
-        "class": "list-group-item-success"
-    },
-    "20": {
-        "name": "Shutdown",
-        "class": ""
-    }
-};
-var protocol = {
-    //request
-    "UPDATE_CONSUMER_REQUEST": "ucreq",
-    "UPDATE_PRODUCER_REQUEST": "upreq",
-    "UPDATE_QUEUE_REQUEST": "uqreq",
-    "UPDATE_PUT_LOCK_REQUEST": "plreq",
-    "UPDATE_TAKE_LOCK_REQUEST": "tlreq",
-    "UPDATE_STATE_REQUEST": "ureq",
-    //response
-    "ucres": "Updating Consumer",
-    "upres": "Updating Producer",
-    "uplres": "Updating Put Lock",
-    "utlres": "Updating Take Lock",
-    "uqres": "Updating Queue",
-    "ures": "Updating Page"
-};
-
-
-
 function connect() {
-    wsocket = new WebSocket("ws://" + window.baseWSUrl + "websocket");
+    var wsocket = new WebSocket("ws://" + window.baseWSUrl + "websocket");
     wsocket.onmessage = onMessage;
+    window.wsocket = wsocket;
 }
 
 function onMessage(evt) {
     var msg = JSON.parse(evt.data);
     switch (msg.type) {
-        case "ures":
+        case protocol.UPDATE_STATE_RESPONSE:
             updatePage(msg);
+            break;
+        case protocol.UPDATE_CONSUMER_RESPONSE:
+        case protocol.UPDATE_PRODUCER_RESPONSE:
+        case protocol.UPDATE_PUT_LOCK_RESPONSE:
+        case protocol.UPDATE_QUEUE_RESPONSE:
+        case protocol.UPDATE_TAKE_LOCK_RESPONSE:
+            infoResponse(msg);
+            break;
+        default :
+            alert("Unknow protocol" + JSON.stringify(msg));
     }
 }
 
@@ -134,11 +64,107 @@ function sendQueueUpdate(capacity, putmin, putmax, takemin, takemax) {
     wsocket.send(JSON.stringify(msg));
 }
 
+function sendPutlockUpdate(lock) {
+    var msg = {};
+    msg.type = protocol.UPDATE_PUT_LOCK_REQUEST;
+    msg.parameters = {};
+    msg.parameters.lock = lock;
+    wsocket.send(JSON.stringify(msg));
+}
+
+function sendTakelockUpdate(lock) {
+    var msg = {};
+    msg.type = protocol.UPDATE_TAKE_LOCK_REQUEST;
+    msg.parameters = {};
+    msg.parameters.lock = lock;
+    wsocket.send(JSON.stringify(msg));
+}
 
 function init() {
     //init socket
+    window.consumerState = {
+        "0": {
+            "name": "Initializing",
+            "class": ""
+        },
+        "1": {
+            "name": "Waiting for Lock",
+            "class": "list-group-item-warning"
+        },
+        "2": {
+            "name": "Waiting for NotEmpty Condition",
+            "class": "list-group-item-info"
+        },
+        "3": {
+            "name": "Locking, Taking Task from Queue",
+            "class": "list-group-item-danger"
+        },
+        "10": {
+            "name": "Executing Task",
+            "class": "list-group-item-success"
+        },
+        "20": {
+            "name": "Shutdown",
+            "class": ""
+        },
+        "30": {
+            "name": "Rollback",
+            "class": "list-group-item-danger"
+        }
+    };
+    window.producerState = {
+        "0": {
+            "name": "Initializing",
+            "class": ""
+        },
+        "1": {
+            "name": "Waiting for Lock",
+            "class": "list-group-item-warning"
+        },
+        "2": {
+            "name": "Waiting for NotFull Condition",
+            "class": "list-group-item-info"
+        },
+        "3": {
+            "name": "Locking, Putting Task to Queue",
+            "class": "list-group-item-danger"
+        },
+        "10": {
+            "name": "Creating Task",
+            "class": "list-group-item-success"
+        },
+        "20": {
+            "name": "Shutdown",
+            "class": ""
+        }
+    };
+    window.protocol = {
+        //request
+        "UPDATE_CONSUMER_REQUEST": "ucreq",
+        "UPDATE_PRODUCER_REQUEST": "upreq",
+        "UPDATE_QUEUE_REQUEST": "uqreq",
+        "UPDATE_PUT_LOCK_REQUEST": "plreq",
+        "UPDATE_TAKE_LOCK_REQUEST": "tlreq",
+        "UPDATE_STATE_REQUEST": "ureq",
+        //response
+        "UPDATE_CONSUMER_RESPONSE": "ucres",
+        "UPDATE_PRODUCER_RESPONSE": "upres",
+        "UPDATE_PUT_LOCK_RESPONSE": "uplres",
+        "UPDATE_TAKE_LOCK_RESPONSE": "utlres",
+        "UPDATE_QUEUE_RESPONSE": "uqres",
+        "UPDATE_STATE_RESPONSE": "ures"
+    };
+    window.responseInfo = {
+        //response
+        "ucres": "Updating consumer",
+        "upres": "Updating producer",
+        "uplres": "Updating putlock",
+        "utlres": "Updating takelock",
+        "uqres": "Updating queue",
+        "ures": "Updating page"
+    };
     window.baseWSUrl = window.location.host + window.location.pathname;
-    //window.baseWSUrl = "localhost:8080/web-0.0.1-SNAPSHOT/";
+    window.baseWSUrl = "localhost:8080/web-0.0.1-SNAPSHOT/";
     connect();
 
     // init cm
@@ -231,14 +257,54 @@ function init() {
         var putmax = $('#putmax').val();
         var takemin = $('#takemin').val();
         var takemax = $('#takemax').val();
-        sendQueueUpdate(capacity,putmin,putmax,takemin,takemax);
+        sendQueueUpdate(capacity, putmin, putmax, takemin, takemax);
         qmodal.modal('hide');
     });
+
+    //init 5l
+    $("#lock-takelock").click(function () {
+        sendTakelockUpdate(true);
+        $("#takelock-menu").addClass("btn-danger");
+    });
+    $("#unlock-takelock").click(function () {
+        sendTakelockUpdate(false);
+        $("#takelock-menu").removeClass("btn-danger");
+    });
+
+    //init pl
+    $("#lock-putlock").click(function () {
+        sendPutlockUpdate(true);
+        $("#putlock-menu").addClass("btn-danger");
+    });
+    $("#unlock-putlock").click(function () {
+        sendPutlockUpdate(false);
+        $("#putlock-menu").removeClass("btn-danger");
+    });
+
     //init update page
     var updatereq = {};
-    updatereq.type=protocol.UPDATE_STATE_REQUEST;
+    updatereq.type = protocol.UPDATE_STATE_REQUEST;
     window.updateRequest = JSON.stringify(updatereq);
-    setInterval(sendUpdate, 250);
+
+    window.pageUpdateInterval = setInterval(sendUpdate, 250);
+}
+
+function infoResponse(msg) {
+    if (msg.success) {
+        var htmlStr = '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
+        htmlStr += '<strong>Success!</strong> ' + window.responseInfo[msg.type] + ' done, ' + msg.message + '</div>';
+        $("#alert").append(htmlStr);
+        $(".alert").fadeTo(5000, 500).slideUp(500, function () {
+            $(this).alert('close');
+        });
+    } else {
+        var htmlStr = '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
+        htmlStr += '<strong>Oh snap!</strong> ' + window.responseInfo[msg.type] + ' failed, ' + msg.message + '</div>';
+        $("#alert").append(htmlStr);
+        $(".alert").fadeTo(5000, 500).slideUp(500, function () {
+            $(this).alert('close');
+        });
+    }
 }
 
 /**
@@ -284,8 +350,8 @@ function updatePage(data) {
             htmlStr += '</p>';
             $('#t' + (i + 1)).html(htmlStr);
         }
-        if(used == 0) {
-            $('#t' + (i + 1)).html("<div class='verticalalign'><h3>Empty</h3></div>");
+        if (used == 0) {
+            $('#t' + (i + 1)).html("<div class='empty'><h4 class='list-group-item-heading'>Empty</h4><p class='list-group-item-text text-left'>&nbsp;<br/>&nbsp;</p></div>");
             used++
         }
         for (var i = used; i < 6; i++) {
@@ -368,10 +434,6 @@ function consumerModalHelper(shutdown) {
     sendConsumerUpdate(name, ef, shutdown);
     cmodal.modal('hide');
 }
-
-
-
-
 
 
 window.addEventListener("load", init, false);

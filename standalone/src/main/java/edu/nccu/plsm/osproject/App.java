@@ -2,8 +2,8 @@ package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.management.Control;
 import edu.nccu.plsm.osproject.management.queue.QueueInfo;
-import edu.nccu.plsm.osproject.task.api.Task;
 import edu.nccu.plsm.osproject.queue.OSProjectQueue;
+import edu.nccu.plsm.osproject.task.api.Task;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.management.MBeanServer;

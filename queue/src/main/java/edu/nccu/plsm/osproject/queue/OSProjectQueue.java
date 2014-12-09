@@ -220,7 +220,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     public synchronized boolean getPutLockState() {
         if (!putLock.isHeldByCurrentThread()) {
             boolean canLock = putLock.tryLock();
-            if(canLock) {
+            if (canLock) {
                 putLock.unlock();
             }
             return !canLock;
@@ -233,7 +233,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     public synchronized boolean getTakeLockState() {
         if (!takeLock.isHeldByCurrentThread()) {
             boolean canLock = takeLock.tryLock();
-            if(canLock) {
+            if (canLock) {
                 takeLock.unlock();
             }
             return !canLock;
@@ -1127,7 +1127,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 if (current != null)
                     currentElement = current.item;
             } finally {
-              //  fullyUnlock();
+                //  fullyUnlock();
             }
         }
 
@@ -1164,7 +1164,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 currentElement = (current == null) ? null : current.item;
                 return x;
             } finally {
-               // fullyUnlock();
+                // fullyUnlock();
             }
         }
 

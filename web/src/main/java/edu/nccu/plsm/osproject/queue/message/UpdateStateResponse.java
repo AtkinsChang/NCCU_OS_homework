@@ -23,7 +23,7 @@ public class UpdateStateResponse extends AbstractResponse {
     public UpdateStateResponse(boolean success, List<ProducerJson> producerJsons, List<ConsumerJson> consumerJsons,
                                List<TaskJson> taskJsons, QueueJson queueJson) {
         super(UPDATE_STATE_RESPONSE, success);
-        if(success) {
+        if (success) {
             this.producerJsons = producerJsons;
             this.consumerJsons = consumerJsons;
             int taskSize = taskJsons.size();

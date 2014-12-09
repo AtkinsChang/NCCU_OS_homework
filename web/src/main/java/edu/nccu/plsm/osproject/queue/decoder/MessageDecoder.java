@@ -3,9 +3,9 @@ package edu.nccu.plsm.osproject.queue.decoder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.nccu.plsm.osproject.queue.message.Message;
 import edu.nccu.plsm.osproject.queue.message.UpdateConsumerRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateProducerRequest;
-import edu.nccu.plsm.osproject.queue.message.Message;
 import edu.nccu.plsm.osproject.queue.message.UpdatePutLockRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateQueueRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateStateRequest;
@@ -22,16 +22,18 @@ public class MessageDecoder implements Decoder.Text<Message> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageDecoder.class);
     private static final ObjectMapper jsonParser;
+
     static {
         jsonParser = new ObjectMapper();
         jsonParser.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, Boolean.FALSE);
     }
+
     private String type;
     private JsonNode parameters;
 
     @Override
     public Message decode(String s) throws DecodeException {
-        LOGGER.info("Decoding {}", s);
+        LOGGER.trace("Decoding {}", s);
         try {
             switch (type) {
                 case Message.UPDATE_STATE_REQUEST:

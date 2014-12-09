@@ -4,11 +4,11 @@ package edu.nccu.plsm.osproject.queue;
 import edu.nccu.plsm.osproject.queue.decoder.MessageDecoder;
 import edu.nccu.plsm.osproject.queue.encoder.DefaultEncoder;
 import edu.nccu.plsm.osproject.queue.message.AbstractResponse;
+import edu.nccu.plsm.osproject.queue.message.Message;
 import edu.nccu.plsm.osproject.queue.message.UpdateConsumerRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateConsumerResponse;
 import edu.nccu.plsm.osproject.queue.message.UpdateProducerRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateProducerResponse;
-import edu.nccu.plsm.osproject.queue.message.Message;
 import edu.nccu.plsm.osproject.queue.message.UpdatePutLockRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdatePutLockResponse;
 import edu.nccu.plsm.osproject.queue.message.UpdateQueueRequest;
@@ -29,6 +29,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @ServerEndpoint(
         value = "/websocket",
@@ -54,7 +56,7 @@ public class Endpoint {
     @OnMessage
     public void message(final Session session, Message msg) throws IOException, EncodeException {
         MDC.put("name", session.getId() + " - ");
-        LOGGER.info("Received: {}", msg.getType());
+        LOGGER.trace("Received: {}", msg.getType());
         AbstractResponse response;
         switch (msg.getType()) {
             case Message.UPDATE_STATE_REQUEST:
@@ -96,7 +98,7 @@ public class Endpoint {
 
     private UpdateConsumerResponse updateConsumer(Message msg) {
         try {
-            UpdateConsumerRequest req = (UpdateConsumerRequest)msg;
+            UpdateConsumerRequest req = (UpdateConsumerRequest) msg;
             Boolean forceShutDown = req.getForceShutdown();
             if (forceShutDown != null) {
                 osProjectBean.shutdownConsumer(req.getName(), forceShutDown);
@@ -107,14 +109,14 @@ public class Endpoint {
         } catch (Exception e) {
             LOGGER.warn("Failed to update consumer", e);
             UpdateConsumerResponse response = new UpdateConsumerResponse(Boolean.FALSE);
-            response.setMessage(e.toString());
+            response.setMessage(throwableToString(e));
             return response;
         }
     }
 
     private UpdateProducerResponse updateProducer(Message msg) {
         try {
-            UpdateProducerRequest req = (UpdateProducerRequest)msg;
+            UpdateProducerRequest req = (UpdateProducerRequest) msg;
             Boolean forceShutDown = req.getForceShutdown();
             if (forceShutDown != null) {
                 osProjectBean.shutdownProducer(req.getName(), forceShutDown);
@@ -127,14 +129,14 @@ public class Endpoint {
         } catch (Exception e) {
             LOGGER.warn("Failed to update consumer", e);
             UpdateProducerResponse response = new UpdateProducerResponse(Boolean.FALSE);
-            response.setMessage(e.toString());
+            response.setMessage(throwableToString(e));
             return response;
         }
     }
 
     private UpdateQueueResponse updateQueue(Message msg) {
         try {
-            UpdateQueueRequest req = (UpdateQueueRequest)msg;
+            UpdateQueueRequest req = (UpdateQueueRequest) msg;
             osProjectBean.updateQueue(req.getCapacity(),
                     req.getMinPutTime(), req.getMaxPutTime(),
                     req.getMinTakeTime(), req.getMaxTakeTime());
@@ -142,14 +144,14 @@ public class Endpoint {
         } catch (Exception e) {
             LOGGER.warn("Failed to update queue", e);
             UpdateQueueResponse response = new UpdateQueueResponse(Boolean.FALSE);
-            response.setMessage(e.toString());
+            response.setMessage(throwableToString(e));
             return response;
         }
     }
 
     private UpdatePutLockResponse updatePutLock(Message msg) {
         try {
-            UpdatePutLockRequest req = (UpdatePutLockRequest)msg;
+            UpdatePutLockRequest req = (UpdatePutLockRequest) msg;
             if (req.getLock()) {
                 osProjectBean.lockPut();
             } else {
@@ -159,14 +161,15 @@ public class Endpoint {
         } catch (Exception e) {
             LOGGER.warn("Failed to update put lock", e);
             UpdatePutLockResponse response = new UpdatePutLockResponse(Boolean.FALSE);
-            response.setMessage(e.toString());
+
+            response.setMessage(throwableToString(e));
             return response;
         }
     }
 
     private UpdateTakeLockResponse updateTakeLock(Message msg) {
         try {
-            UpdateTakeLockRequest req = (UpdateTakeLockRequest)msg;
+            UpdateTakeLockRequest req = (UpdateTakeLockRequest) msg;
             if (req.getLock()) {
                 osProjectBean.lockTake();
             } else {
@@ -176,9 +179,20 @@ public class Endpoint {
         } catch (Exception e) {
             LOGGER.warn("Failed to update take lock", e);
             UpdateTakeLockResponse response = new UpdateTakeLockResponse(Boolean.FALSE);
-            response.setMessage(e.toString());
+            response.setMessage(throwableToString(e));
             return response;
         }
+    }
+
+    private String throwableToString(Throwable t) {
+        StringWriter sw = new StringWriter();
+        sw.append(t.toString());
+        Throwable nt = t.getCause();
+        while (nt != null) {
+            sw.append(nt.toString());
+            nt = nt.getCause();
+        }
+        return sw.toString();
     }
 
 }

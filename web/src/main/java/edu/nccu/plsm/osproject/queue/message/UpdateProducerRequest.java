@@ -10,16 +10,16 @@ public class UpdateProducerRequest extends Message {
     private Integer minTaskExecutionTime;
     private Boolean forceShutdown;
 
+    public UpdateProducerRequest() {
+        super(UPDATE_PRODUCER_REQUEST);
+    }
+
     public Boolean getForceShutdown() {
         return forceShutdown;
     }
 
     public void setForceShutdown(Boolean forceShutdown) {
         this.forceShutdown = forceShutdown;
-    }
-
-    public UpdateProducerRequest() {
-        super(UPDATE_PRODUCER_REQUEST);
     }
 
     public String getName() {

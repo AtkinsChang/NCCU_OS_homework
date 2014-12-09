@@ -3,8 +3,8 @@ package edu.nccu.plsm.osproject.management.queue;
 import com.google.common.collect.ImmutableSet;
 import edu.nccu.plsm.osproject.management.task.TaskInfo;
 import edu.nccu.plsm.osproject.management.task.TaskInfoMBean;
-import edu.nccu.plsm.osproject.task.api.Task;
 import edu.nccu.plsm.osproject.queue.OSProjectQueue;
+import edu.nccu.plsm.osproject.task.api.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

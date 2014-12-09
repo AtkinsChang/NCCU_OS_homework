@@ -29,3 +29,11 @@
 .verticalalign {
     vertical-align: middle;
 }
+
+.empty {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+    border: 1px;
+}

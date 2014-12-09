@@ -59,6 +59,8 @@
 
 </section>
 
+<div id="alert"></div>
+
 <div class="modal fade" id="consumerModal" tabindex="-1" role="dialog" aria-labelledby="consumerModal"
      aria-hidden="true">
     <div class="modal-dialog">
@@ -90,7 +92,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="producerModal" tabindex="-1" role="dialog" aria-labelledby="producerModal"
      aria-hidden="true">
@@ -245,23 +246,53 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="col-md-2">
-                                    <p><a class="btn btn-lg" id="takelock" role="button">Take Lock</a></p>
+                                    <p>
+
+                                    <div class="btn-group dropdown">
+                                        <a class="btn btn-lg" id="takelock" role="button">Take Lock</a>
+                                        <button type="button" id="takelock-menu"
+                                                class="btn btn-default btn-lg dropdown-toggle" data-toggle="dropdown"
+                                                aria-expanded="false">
+                                            <span class="caret"></span>
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a id="lock-takelock">Lock</a></li>
+                                            <li><a id="unlock-takelock">Unlock</a></li>
+                                        </ul>
+                                    </div>
+                                    </p>
                                 </div>
                                 <div class="col-md-3">
                                     <p class="text-left">
                                         Take item to queue will cost:<br/>
-                                        <span id="minPutTime"></span> ms ~ <span id="maxPutTime"></span> ms
+                                        <span id="minTakeTime"></span> ms ~ <span id="maxTakeTime"></span> ms
                                     </p>
                                 </div>
                                 <div class="col-md-1"/>
                             </div>
                             <div class="col-md-2">
-                                <p><a class="btn btn-lg" id="putlock" role="button">Put Lock</a></p>
+                                <p>
+
+                                <div class="btn-group dropdown">
+                                    <a class="btn btn-lg" id="putlock" role="button">Put Lock</a>
+                                    <button type="button" id="putlock-menu"
+                                            class="btn btn-default btn-lg dropdown-toggle" data-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <span class="caret"></span>
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a id="lock-putlock">Lock</a></li>
+                                        <li><a id="unlock-putlock">Unlock</a></li>
+                                    </ul>
+                                </div>
+                                </p>
                             </div>
                             <div class="col-md-3">
                                 <p class="text-left">
                                     Put item from queue will cost:<br/>
-                                    <span id="minTakeTime"></span> ms ~ <span id="maxTakeTime"></span> ms
+                                    <span id="minPutTime"></span> ms ~ <span id="maxPutTime"></span> ms
                                 </p>
                             </div>
                             <div class="col-md-1"/>

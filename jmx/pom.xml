@@ -5,15 +5,15 @@
     <parent>
         <groupId>edu.nccu.plsm.osproject</groupId>
         <artifactId>main</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-    <artifactId>management</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>jmx</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>OS Project - Queue Management</name>
-    <description>management</description>
+    <name>OS Project - JMX</name>
+    <description>JMX</description>
 
     <dependencies>
         <dependency>
