@@ -42,7 +42,7 @@ public class SimpleTask implements Task {
         } catch (InterruptedException e) {
             long timeInterrupted = System.nanoTime();
             LOGGER.info("Task {} interrupt while executing", this.toString(), e);
-            this.timeNeeded = (int) TimeUnit.NANOSECONDS.toMillis(timeStart - timeInterrupted);
+            this.timeNeeded -= (int) TimeUnit.NANOSECONDS.toMillis(timeInterrupted - timeStart);
             this.turnaroundTime++;
             throw new TaskNotCompleteException("interrupt", e);
         }

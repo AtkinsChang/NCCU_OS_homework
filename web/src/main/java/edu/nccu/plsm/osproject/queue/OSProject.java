@@ -55,6 +55,7 @@ public class OSProject implements OSProjectBean {
         queue = new OSProjectQueue<>(Integer.MAX_VALUE, managedExecutorService);
         consumers = new HashMap<>();
         producers = new HashMap<>();
+        queue.setCapacity(100);
        //control.setQueue(queue);
        // queueInfo.setQueue(queue);
         queue.acquirePutLock();
@@ -69,6 +70,8 @@ public class OSProject implements OSProjectBean {
         for(ProducerExecutingInfo p : producers.values()) {
             p.getFuture().cancel(true);
         }
+        queue.releasePutLock();
+        queue.releaseTakeLock();
         LOGGER.info("Shutdown complete");
     }
 
@@ -126,6 +129,7 @@ public class OSProject implements OSProjectBean {
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("{} shutdown consumer {}", mayInterruptIfRunning?"force":"gracefully", name);
             }
+            c.getConsumerMonitor().shutdownGracefully();
             c.getFuture().cancel(mayInterruptIfRunning);
         } else {
             LOGGER.info("Consumer {} not found", name);
@@ -158,6 +162,7 @@ public class OSProject implements OSProjectBean {
         ProducerExecutingInfo p = producers.remove(name);
         if (p != null) {
             LOGGER.info("{} shutdown producer {}", mayInterruptIfRunning?"force":"gracefully", name);
+            p.getProducerMonitor().shutdownGracefully();
             p.getFuture().cancel(mayInterruptIfRunning);
         } else {
             LOGGER.info("Producer {} not found", name);

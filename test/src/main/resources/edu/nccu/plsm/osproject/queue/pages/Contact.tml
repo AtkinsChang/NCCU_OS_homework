@@ -1,7 +1,0 @@
-<html t:type="layout" title="Contact edu.nccu.plsm.osproject"
-      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
-      xmlns:p="tapestry:parameter">
-
-    <p>Contact edu.nccu.plsm.osproject ...</p>
-
-</html>

@@ -11,7 +11,7 @@ public class QueueJson {
     private final int maxTakeTime;
     private final int minTakeTime;
     private final int maxPutTime;
-    private final int minPutTIme;
+    private final int minPutTime;
     private final boolean takeLockState;
     private final boolean putLockState;
 
@@ -20,7 +20,7 @@ public class QueueJson {
         this.totalCapacity = queue.getCapacity();
         this.usedCapacity = queue.size();
         this.maxPutTime = queue.getMaxPutTime(TimeUnit.MILLISECONDS);
-        this.minPutTIme = queue.getMinPutTime(TimeUnit.MILLISECONDS);
+        this.minPutTime = queue.getMinPutTime(TimeUnit.MILLISECONDS);
         this.maxTakeTime = queue.getMaxTakeTime(TimeUnit.MILLISECONDS);
         this.minTakeTime = queue.getMinTakeTime(TimeUnit.MILLISECONDS);
         this.takeLockState = queue.getTakeLockState();
@@ -47,8 +47,8 @@ public class QueueJson {
         return maxPutTime;
     }
 
-    public int getMinPutTIme() {
-        return minPutTIme;
+    public int getMinPutTime() {
+        return minPutTime;
     }
 
     public boolean isTakeLockState() {

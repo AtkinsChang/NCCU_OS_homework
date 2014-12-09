@@ -29,6 +29,7 @@ public class QueueLocker implements Serializable {
         if (lockingPut == null || lockingPut.isDone()) {
             lockingPut = es.submit(() -> {
                 try {
+                    LOGGER.info("Locking put");
                     putLock.lock();
                     while (Boolean.TRUE) {
                         Thread.sleep(Long.MAX_VALUE);
@@ -60,6 +61,7 @@ public class QueueLocker implements Serializable {
         if (lockingTake == null || lockingTake.isDone()) {
             lockingTake = es.submit(() -> {
                 try {
+                    LOGGER.info("Locking put");
                     takeLock.lock();
                     while (Boolean.TRUE) {
                         Thread.sleep(Long.MAX_VALUE);
@@ -73,7 +75,6 @@ public class QueueLocker implements Serializable {
                 }
             });
         }
-
     }
 
     public void unlockTake() {

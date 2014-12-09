@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.nccu.plsm.osproject.queue.message.UpdateConsumerRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateProducerRequest;
 import edu.nccu.plsm.osproject.queue.message.Message;
+import edu.nccu.plsm.osproject.queue.message.UpdatePutLockRequest;
+import edu.nccu.plsm.osproject.queue.message.UpdateQueueRequest;
 import edu.nccu.plsm.osproject.queue.message.UpdateStateRequest;
+import edu.nccu.plsm.osproject.queue.message.UpdateTakeLockRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,12 @@ public class MessageDecoder implements Decoder.Text<Message> {
                     return jsonParser.readValue(jsonParser.writeValueAsString(parameters), UpdateProducerRequest.class);
                 case Message.UPDATE_CONSUMER_REQUEST:
                     return jsonParser.readValue(jsonParser.writeValueAsString(parameters), UpdateConsumerRequest.class);
+                case Message.UPDATE_QUEUE_REQUEST:
+                    return jsonParser.readValue(jsonParser.writeValueAsString(parameters), UpdateQueueRequest.class);
+                case Message.UPDATE_PUT_LOCK_REQUEST:
+                    return jsonParser.readValue(jsonParser.writeValueAsString(parameters), UpdatePutLockRequest.class);
+                case Message.UPDATE_TAKE_LOCK_REQUEST:
+                    return jsonParser.readValue(jsonParser.writeValueAsString(parameters), UpdateTakeLockRequest.class);
                 default:
                     //ignore
                     throw new DecodeException(s, "");

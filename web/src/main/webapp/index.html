@@ -1,127 +1,303 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-    <script type="text/javascript">
-        var wsocket;
-        var baseUrl = window.location.host + window.location.pathname;
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="">
 
-        function connect() {
-            wsocket = new WebSocket("ws://" + baseUrl + "websocket");
-            wsocket.onmessage = onMessage;
-        }
-
-        function onMessage(evt) {
-            var msg = JSON.parse(evt.data);
-            document.body.innerHTML = evt.data;
-        }
-
-        /* Send a join message to the server */
-        function sendJoin() {
-            var input = document.getElementById("input");
-            var name = document.getElementById("name");
-            var join = document.getElementById("join");
-            var jsonstr;
-            if (name.value.length > 0) {
-                /* Create a message as a JavaScript object */
-                var joinMsg = {};
-                joinMsg.type = "join";
-                joinMsg.name = name.value;
-                /* Convert the message to JSON */
-                jsonstr = JSON.stringify(joinMsg);
-                /* Send the JSON text */
-                wsocket.send(jsonstr);
-                /* Disable join controls */
-                name.disabled = true;
-                join.disabled = true;
-                input.disabled = false;
-                userName = name.value;
-                /* Update the Websocket console area */
-                wsconsole.value += "<- " + jsonstr + "\n";
-                wsconsole.scrollTop = 999999;
-            }
-        }
-        /* Send a chat message to the server (press ENTER on the input area) */
-        function sendMessage(evt) {
-            var input = document.getElementById("input");
-            var jsonstr;
-            var msgstr;
-            if (evt.keyCode === 13 && input.value.length > 0) {
-                /* Create a chat message as a JavaScript object */
-                var chatMsg = {};
-                chatMsg.type = "chat";
-                chatMsg.name = userName;
-                msgstr = input.value;
-                chatMsg.target = getTarget(msgstr.replace(/,/g, ""));
-                chatMsg.message = cleanTarget(msgstr);
-                chatMsg.message = chatMsg.message.replace(/(\r\n|\n|\r)/gm,"");
-                /* Convert the object to JSON */
-                jsonstr = JSON.stringify(chatMsg);
-                /* Send the message as JSON text */
-                wsocket.send(jsonstr);
-                input.value = "";
-                /* Update the Websocket console area */
-                wsconsole.value += "<- " + jsonstr + "\n";
-                wsconsole.scrollTop = 999999;
-            }
-        }
-        /* Send a join message if the user presses ENTER in the name area */
-        function checkJoin(evt) {
-            var name = document.getElementById("name");
-            var input = document.getElementById("input");
-            if (evt.keyCode === 13 && name.value.length > 0) {
-                sendJoin();
-                input.focus();
-            }
-        }
-        /* Get the @User (target) for a message */
-        function getTarget(str) {
-            var arr = str.split(" ");
-            var target = "";
-            for (var i=0; i<arr.length; i++) {
-                if (arr[i].charAt(0) === '@') {
-                    target = arr[i].substring(1,arr[i].length);
-                    target = target.replace(/(\r\n|\n|\r)/gm,"");
-                }
-            }
-            return target;
-        }
-        /* Remove the @User (target) from a message */
-        function cleanTarget(str) {
-            var arr = str.split(" ");
-            var cleanstr = "";
-            for (var i=0; i<arr.length; i++) {
-                if (arr[i].charAt(0) !== '@')
-                    cleanstr += arr[i] + " ";
-            }
-            return cleanstr.substring(0,cleanstr.length-1);
-        }
-        /* Show or hide the WebSocket console */
-        function showHideConsole() {
-            var chkbox = document.getElementById("showhideconsole");
-            var consolediv = document.getElementById("consolediv");
-            if (chkbox.checked)
-                consolediv.style.visibility = 'visible';
-            else
-                consolediv.style.visibility = 'hidden';
-        }
-
-        window.addEventListener("load", connect, false);
-    </script>
+    <title>OS Project</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="resources/css/style.css">
+    <!--link rel="stylesheet" href="cover.css"-->
 </head>
-<body>
-<div class="list-group">
-    <a href="#" class="list-group-item list-group-item-success">Dapibus ac facilisis in</a>
-    <a href="#" class="list-group-item list-group-item-info">Cras sit amet nibh libero</a>
-    <a href="#" class="list-group-item list-group-item-warning">Porta ac consectetur ac</a>
-    <a href="#" class="list-group-item list-group-item-danger">Vestibulum at eros</a>
+<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">OS Project</a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                <li class="hidden">
+                    <a href="#"></a>
+                </li>
+                <li class="page-scroll">
+                    <a data-toggle="modal" data-target="#consumerModal" data-title="Add Consumer">Add Consumer</a>
+                </li>
+                <li class="page-scroll">
+                    <a data-toggle="modal" data-target="#producerModal" data-title="Add Producer">Add Producer</a>
+                </li>
+                <li class="page-scroll">
+                    <a data-toggle="modal" data-target="#queueModal" data-title="Config Queue">Config Queue</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="intro-section">
+    <div class="container ">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="intro-text">
+                    <h1>Producer and Consumer</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<div class="modal fade" id="consumerModal" tabindex="-1" role="dialog" aria-labelledby="consumerModal"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="consumerModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="consumer-name" class="control-label">Name:</label>
+                        <input type="text" class="form-control pm" id="consumer-name" required
+                               placeholder="Consumer Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="efficiency" class="control-label">Efficiency:</label>
+                        <input type="number" min="0" class="form-control pe" id="efficiency" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="consumer-shutdown" class="btn btn-warning">Shutdown</button>
+                <button type="button" id="consumer-fshutdown" class="btn btn-danger">Force Shutdown</button>
+                <button type="button" id="consumer-update" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="list-group">
-    <a href="#" class="list-group-item active">
-        <h4 class="list-group-item-heading">List group item heading</h4>
-        <p class="list-group-item-text">...</p>
-    </a>
+
+
+<div class="modal fade" id="producerModal" tabindex="-1" role="dialog" aria-labelledby="producerModal"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="producerModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="producer-name" class="control-label">Name:</label>
+                        <input type="text" class="form-control pm" id="producer-name" required
+                               placeholder="Producer Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="tn" class="control-label">Time Needed to Create Task:</label>
+
+                        <div class="form-inline" id="tn">
+                            <label for="pmin" class="control-label">Min</label>
+                            <input type="text" class="form-control" id="pmin"
+                                   placeholder="Min Value"><span> ms     </span>
+                            <label for="pmax" class="control-label">Max</label>
+                            <input type="text" class="form-control" id="pmax"
+                                   placeholder="Max Value"><span> ms     </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="te" class="control-label">Time Needed for Execution of Task:</label>
+
+                        <div class="form-inline" id="te">
+                            <label for="tmin" class="control-label">Min</label>
+                            <input type="text" class="form-control" id="tmin"
+                                   placeholder="Min Value"><span> ms     </span>
+                            <label for="tmax" class="control-label">Max</label>
+                            <input type="text" class="form-control" id="tmax"
+                                   placeholder="Max Value"><span> ms     </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="producer-shutdown" class="btn btn-warning">Shutdown</button>
+                <button type="button" id="producer-fshutdown" class="btn btn-danger">Force Shutdown</button>
+                <button type="button" id="producer-update" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="modal fade" id="queueModal" tabindex="-1" role="dialog" aria-labelledby="queueModal"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="queueModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="queue-capacity" class="control-label">Capacity:</label>
+                        <input type="text" class="form-control" id="queue-capacity" required
+                               placeholder="Capacity">
+                    </div>
+                    <div class="form-group">
+                        <label for="tn" class="control-label">Time Needed to Take Item from Queue:</label>
+
+                        <div class="form-inline">
+                            <label for="takemin" class="control-label">Min</label>
+                            <input type="text" class="form-control" id="takemin"
+                                   placeholder="Min Value"><span> ms     </span>
+                            <label for="takemax" class="control-label">Max</label>
+                            <input type="text" class="form-control" id="takemax"
+                                   placeholder="Max Value"><span> ms     </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="te" class="control-label">Time Needed to Put Item to Queue:</label>
+
+                        <div class="form-inline">
+                            <label for="putmin" class="control-label">Min</label>
+                            <input type="text" class="form-control" id="putmin"
+                                   placeholder="Min Value"><span> ms     </span>
+                            <label for="putmax" class="control-label">Max</label>
+                            <input type="text" class="form-control" id="putmax"
+                                   placeholder="Max Value"><span> ms     </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="queue-update" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="queue-section">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 id="grid-nesting">Queue</h4>
+
+                        <div class="col-md-2 text-left">
+                            <p>
+                                Capacity: <span id="totalCapacity"></span><br/>
+                                Used: <span id="usedCapacity"></span><br/>
+                            </p>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="progress">
+                                <div id="progress" class="progress-bar progress-bar-success" role="progressbar"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                    <span class="sr-only"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row show-grid">
+                            <div class="col-md-12">
+                                <h5>Task</h5>
+
+                                <div class="row">
+                                    <div class="col-md-2 verticalalign" id="t1">
+
+                                    </div>
+                                    <div class="col-md-2 verticalalign" id="t2">
+
+                                    </div>
+                                    <div class="col-md-2 verticalalign" id="t3">
+
+                                    </div>
+                                    <div class="col-md-2 verticalalign" id="t4">
+
+                                    </div>
+                                    <div class="col-md-2 verticalalign" id="t5">
+
+                                    </div>
+                                    <div class="col-md-2 verticalalign" id="t6">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-2">
+                                    <p><a class="btn btn-lg" id="takelock" role="button">Take Lock</a></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="text-left">
+                                        Take item to queue will cost:<br/>
+                                        <span id="minPutTime"></span> ms ~ <span id="maxPutTime"></span> ms
+                                    </p>
+                                </div>
+                                <div class="col-md-1"/>
+                            </div>
+                            <div class="col-md-2">
+                                <p><a class="btn btn-lg" id="putlock" role="button">Put Lock</a></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="text-left">
+                                    Put item from queue will cost:<br/>
+                                    <span id="minTakeTime"></span> ms ~ <span id="maxTakeTime"></span> ms
+                                </p>
+                            </div>
+                            <div class="col-md-1"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="bs-docs-masthead" id="content" role="main">
+    <div class="container">
+        <div class="col-md-5">
+            <div class="list-group">
+                <h3>Consumer</h3>
+
+                <div id="consumer">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-5">
+            <div class="list-group">
+                <h3>Producer</h3>
+
+                <div id="producer">
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="resources/script/init.js" type="text/javascript"></script>
 </body>
 </html>
+

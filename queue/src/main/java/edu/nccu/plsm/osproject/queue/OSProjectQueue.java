@@ -219,11 +219,11 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     @Override
     public synchronized boolean getPutLockState() {
         if (!putLock.isHeldByCurrentThread()) {
-            try {
-                return !putLock.tryLock();
-            } finally {
+            boolean canLock = putLock.tryLock();
+            if(canLock) {
                 putLock.unlock();
             }
+            return !canLock;
         } else {
             return Boolean.TRUE;
         }
@@ -232,11 +232,11 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     @Override
     public synchronized boolean getTakeLockState() {
         if (!takeLock.isHeldByCurrentThread()) {
-            try {
-                return !takeLock.tryLock();
-            } finally {
+            boolean canLock = takeLock.tryLock();
+            if(canLock) {
                 takeLock.unlock();
             }
+            return !canLock;
         } else {
             return Boolean.TRUE;
         }
@@ -890,8 +890,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
      * Returns an iterator over the elements in this queue in proper sequence.
      * The elements will be returned in order from first (head) to last (tail).
      * <p/>
-     * <p>The returned iterator is
-     * <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
+     * <p>The returned iterator is not thread-safe for demo purpose
      *
      * @return an iterator over the elements in this queue in proper sequence
      */
@@ -1108,6 +1107,8 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
         }
     }
 
+
+    //Warning: not thread-safe
     private class Itr implements Iterator<E> {
         /*
          * Basic weakly-consistent iterator.  At all times hold the next
@@ -1120,13 +1121,13 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
         private E currentElement;
 
         Itr() {
-            fullyLock();
+            //fullyLock();
             try {
                 current = head.next;
                 if (current != null)
                     currentElement = current.item;
             } finally {
-                fullyUnlock();
+              //  fullyUnlock();
             }
         }
 
@@ -1153,7 +1154,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
         }
 
         public E next() {
-            fullyLock();
+            //fullyLock();
             try {
                 if (current == null)
                     throw new NoSuchElementException();
@@ -1163,7 +1164,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
                 currentElement = (current == null) ? null : current.item;
                 return x;
             } finally {
-                fullyUnlock();
+               // fullyUnlock();
             }
         }
 
