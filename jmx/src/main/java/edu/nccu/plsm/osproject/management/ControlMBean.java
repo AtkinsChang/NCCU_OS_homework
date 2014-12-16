@@ -1,6 +1,6 @@
 package edu.nccu.plsm.osproject.management;
 
-import edu.nccu.plsm.osproject.queue.api.Lockable;
+import edu.nccu.plsm.osproject.web.api.Lockable;
 
 import javax.ejb.Local;
 

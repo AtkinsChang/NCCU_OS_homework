@@ -1,11 +1,11 @@
 package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.api.ProducerMonitor;
-import edu.nccu.plsm.osproject.queue.TimeRange;
-import edu.nccu.plsm.osproject.queue.api.ProducerBuffer;
-import edu.nccu.plsm.osproject.queue.api.ProducerStateHelper;
 import edu.nccu.plsm.osproject.task.SimpleTask;
 import edu.nccu.plsm.osproject.task.api.Task;
+import edu.nccu.plsm.osproject.web.TimeRange;
+import edu.nccu.plsm.osproject.web.api.ProducerBuffer;
+import edu.nccu.plsm.osproject.web.api.ProducerStateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -93,24 +93,29 @@ public class Producer implements ProducerStateHelper, ProducerMonitor, Runnable 
 
     @Override
     public void run() {
-        //this.runningThread = Thread.currentThread();
-        //this.runningThread.setName("producer-" + name);
-        MDC.put("name", name + " -     ");
+        MDC.put("name", name);
         isRunning.set(Boolean.TRUE);
         try {
             while (isRunning.get()) {
                 state.set(CREATING_TASK);
-                Task task = new SimpleTask(this.name, taskExecutionTimeRange.random());
+                MDC.put("state", "Sleeping");
                 LOGGER.info("Creating task...");
+                Task task = new SimpleTask(this.name, taskExecutionTimeRange.random());
                 count.getAndIncrement();
                 Thread.sleep(productionTimeRange.random());
-                LOGGER.info("Task creation done, putting to producer buffer");
+                MDC.put("state", "Accessing buffer");
+                LOGGER.info("Task creation done, putting to buffer");
                 state.set(WAITING_LOCK);
                 producerBuffer.put(this, task);
+                MDC.put("state", "Access complete");
+                LOGGER.info("Done");
             }
+            MDC.remove("state");
         } catch (InterruptedException e) {
+            MDC.remove("state");
             LOGGER.warn("Forced stop, abandon task");
         } catch (Exception e) {
+            MDC.remove("state");
             LOGGER.error("error", e);
         } finally {
             state.set(SHUTDOWN);

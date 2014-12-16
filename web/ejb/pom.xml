@@ -4,16 +4,16 @@
 
     <parent>
         <groupId>edu.nccu.plsm.osproject</groupId>
-        <artifactId>main</artifactId>
+        <artifactId>web</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-    <artifactId>standalone</artifactId>
+    <artifactId>web-ejb</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>ejb</packaging>
 
-    <name>OS Project - Standalone</name>
-    <description>standalone</description>
+    <name>OS Project - Web EJB</name>
+    <description>EJB</description>
 
     <dependencies>
         <dependency>
@@ -38,14 +38,12 @@
         </dependency>
         <dependency>
             <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>jmx</artifactId>
-            <scope>compile</scope>
+            <artifactId>web-common</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>compile</scope>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -54,44 +52,20 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>edu.nccu.plsm.osproject.App</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <ejbVersion>3.2</ejbVersion>
+                    <generateClient>true</generateClient>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,10 +1,10 @@
 package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.api.ConsumerMonitor;
-import edu.nccu.plsm.osproject.queue.api.ConsumerBuffer;
-import edu.nccu.plsm.osproject.queue.api.ConsumerStateHelper;
 import edu.nccu.plsm.osproject.task.TaskNotCompleteException;
 import edu.nccu.plsm.osproject.task.api.Task;
+import edu.nccu.plsm.osproject.web.api.ConsumerBuffer;
+import edu.nccu.plsm.osproject.web.api.ConsumerStateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -82,23 +82,26 @@ public class Consumer implements ConsumerStateHelper, ConsumerMonitor, Runnable 
 
     @Override
     public void run() {
-        //this.runningThread = Thread.currentThread();
-        //this.runningThread.setName("consumer-" + name);
+        MDC.put("name", name);
         this.isRunning.getAndSet(Boolean.TRUE);
-        MDC.put("name", name + " - ");
         Task task = null;
         try {
             while (isRunning.get()) {
-                LOGGER.info("Taking task from queue");
+                MDC.put("state", "Accessing buffer");
+                LOGGER.info("Taking task from buffer");
                 state.set(WAITING_LOCK);
                 task = consumerBuffer.take(this);
+                MDC.put("state", "Access complete");
+                LOGGER.info("Done");
+                MDC.put("state", "Sleeping");
                 LOGGER.info("Executing task create by {}...", task.getCreatorName());
                 state.set(EXECUTING);
                 count.getAndIncrement();
                 task.doTask(efficiency.get());
-                LOGGER.trace("Task complete");
             }
+            MDC.remove("state");
         } catch (TaskNotCompleteException e) {
+            MDC.remove("state");
             state.set(ROLLBACK);
             LOGGER.warn("Interrupted while executing task, save task state and put back to buffer...", e);
             boolean isTaskRePut = Boolean.FALSE;
@@ -110,14 +113,15 @@ public class Consumer implements ConsumerStateHelper, ConsumerMonitor, Runnable 
                 }
             }
         } catch (InterruptedException e) {
+            MDC.remove("state");
             LOGGER.warn("Interrupted while taking task", e);
         } catch (Exception exception) {
+            MDC.remove("state");
             LOGGER.error("Error", exception);
         } finally {
             state.set(SHUTDOWN);
             LOGGER.info("Shutdown complete");
         }
     }
-
 
 }

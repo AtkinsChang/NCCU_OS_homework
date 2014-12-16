@@ -24,6 +24,7 @@
         <module>jmx</module>
         <module>standalone</module>
         <module>web</module>
+
     </modules>
 
     <properties>
@@ -55,6 +56,9 @@
         <plugin.maven-javadoc.version>2.10.1</plugin.maven-javadoc.version>
         <plugin.maven-assembly.verison>2.5.2</plugin.maven-assembly.verison>
         <plugin.maven-versions.verison>2.1</plugin.maven-versions.verison>
+        <plugin.war-plugin.verison>2.5</plugin.war-plugin.verison>
+        <plugin.ejb-plugin.verison>2.4</plugin.ejb-plugin.verison>
+        <plugin.ear-plugin.verison>2.9.1</plugin.ear-plugin.verison>
     </properties>
 
     <dependencyManagement>
@@ -83,6 +87,23 @@
                 <groupId>edu.nccu.plsm.osproject</groupId>
                 <artifactId>jmx</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.nccu.plsm.osproject</groupId>
+                <artifactId>web-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.nccu.plsm.osproject</groupId>
+                <artifactId>web-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>edu.nccu.plsm.osproject</groupId>
+                <artifactId>web-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
             </dependency>
 
             <dependency>
@@ -213,6 +234,21 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>${plugin.maven-versions.verison}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-ejb-plugin</artifactId>
+                    <version>${plugin.ejb-plugin.verison}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${plugin.war-plugin.verison}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-ear-plugin</artifactId>
+                    <version>${plugin.ear-plugin.verison}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
