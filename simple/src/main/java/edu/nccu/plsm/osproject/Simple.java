@@ -44,10 +44,6 @@ public class Simple {
         Thread producer = new Thread(new Producer(buffer));
         producer.setName("producer");
         producer.start();
-
-        //join
-        consumer.join();
-        producer.join();
     }
 
     private static class Producer implements Runnable {
