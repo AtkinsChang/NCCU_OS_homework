@@ -1,12 +1,12 @@
-package edu.nccu.plsm.osproject.web;
+package edu.nccu.plsm.osproject.queue;
 
-import edu.nccu.plsm.osproject.web.api.Configurable;
-import edu.nccu.plsm.osproject.web.api.ConsumerBuffer;
-import edu.nccu.plsm.osproject.web.api.ConsumerStateHelper;
-import edu.nccu.plsm.osproject.web.api.Lockable;
-import edu.nccu.plsm.osproject.web.api.Monitorable;
-import edu.nccu.plsm.osproject.web.api.ProducerBuffer;
-import edu.nccu.plsm.osproject.web.api.ProducerStateHelper;
+import edu.nccu.plsm.osproject.queue.api.Configurable;
+import edu.nccu.plsm.osproject.queue.api.ConsumerBuffer;
+import edu.nccu.plsm.osproject.queue.api.ConsumerStateHelper;
+import edu.nccu.plsm.osproject.queue.api.Lockable;
+import edu.nccu.plsm.osproject.queue.api.Monitorable;
+import edu.nccu.plsm.osproject.queue.api.ProducerBuffer;
+import edu.nccu.plsm.osproject.queue.api.ProducerStateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

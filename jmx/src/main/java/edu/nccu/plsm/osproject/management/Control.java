@@ -6,8 +6,8 @@ import edu.nccu.plsm.osproject.management.consumer.ConsumerInfo;
 import edu.nccu.plsm.osproject.management.consumer.ConsumerInfoMBean;
 import edu.nccu.plsm.osproject.management.producer.ProducerInfo;
 import edu.nccu.plsm.osproject.management.producer.ProducerInfoMBean;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import edu.nccu.plsm.osproject.task.api.Task;
-import edu.nccu.plsm.osproject.web.OSProjectQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

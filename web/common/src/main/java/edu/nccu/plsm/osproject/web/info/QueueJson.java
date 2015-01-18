@@ -1,6 +1,6 @@
 package edu.nccu.plsm.osproject.web.info;
 
-import edu.nccu.plsm.osproject.web.OSProjectQueue;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;

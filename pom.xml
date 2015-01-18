@@ -17,6 +17,7 @@
     </organization>
 
     <modules>
+        <module>simple</module>
         <module>queue</module>
         <module>task</module>
         <module>producer</module>
@@ -24,7 +25,6 @@
         <module>jmx</module>
         <module>standalone</module>
         <module>web</module>
-
     </modules>
 
     <properties>

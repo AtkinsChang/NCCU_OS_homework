@@ -1,4 +1,4 @@
-package edu.nccu.plsm.osproject.web;
+package edu.nccu.plsm.osproject.queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

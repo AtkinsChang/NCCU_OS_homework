@@ -2,15 +2,15 @@ package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.management.Control;
 import edu.nccu.plsm.osproject.management.queue.QueueInfo;
+import edu.nccu.plsm.osproject.queue.OSProjectQueue;
 import edu.nccu.plsm.osproject.task.api.Task;
-import edu.nccu.plsm.osproject.web.OSProjectQueue;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class App {
+public class StandAlone {
 
     public static void main(String[] args) throws Exception {
         //Producer Thread Pool

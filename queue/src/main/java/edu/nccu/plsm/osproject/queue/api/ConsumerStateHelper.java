@@ -1,4 +1,4 @@
-package edu.nccu.plsm.osproject.web.api;
+package edu.nccu.plsm.osproject.queue.api;
 
 public interface ConsumerStateHelper {
 

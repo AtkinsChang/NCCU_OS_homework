@@ -1,4 +1,4 @@
-package edu.nccu.plsm.osproject.web;
+package edu.nccu.plsm.osproject.queue;
 
 import java.security.SecureRandom;
 import java.util.Random;

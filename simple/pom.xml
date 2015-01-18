@@ -8,66 +8,30 @@
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-    <artifactId>standalone</artifactId>
+    <artifactId>simple</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>OS Project - Standalone</name>
-    <description>standalone</description>
+    <name>OS Project - Simple</name>
+    <description>simple</description>
 
     <dependencies>
         <dependency>
-            <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>queue</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>task</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>producer</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>consumer</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>edu.nccu.plsm.osproject</groupId>
-            <artifactId>jmx</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

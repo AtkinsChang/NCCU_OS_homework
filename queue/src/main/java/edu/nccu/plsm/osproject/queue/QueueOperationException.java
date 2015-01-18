@@ -1,4 +1,4 @@
-package edu.nccu.plsm.osproject.web;
+package edu.nccu.plsm.osproject.queue;
 
 public class QueueOperationException extends RuntimeException {
 

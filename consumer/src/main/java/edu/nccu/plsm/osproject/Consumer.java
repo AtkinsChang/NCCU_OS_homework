@@ -1,10 +1,10 @@
 package edu.nccu.plsm.osproject;
 
 import edu.nccu.plsm.osproject.api.ConsumerMonitor;
+import edu.nccu.plsm.osproject.queue.api.ConsumerBuffer;
+import edu.nccu.plsm.osproject.queue.api.ConsumerStateHelper;
 import edu.nccu.plsm.osproject.task.TaskNotCompleteException;
 import edu.nccu.plsm.osproject.task.api.Task;
-import edu.nccu.plsm.osproject.web.api.ConsumerBuffer;
-import edu.nccu.plsm.osproject.web.api.ConsumerStateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

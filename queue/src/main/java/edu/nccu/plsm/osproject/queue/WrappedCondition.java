@@ -1,4 +1,4 @@
-package edu.nccu.plsm.osproject.web;
+package edu.nccu.plsm.osproject.queue;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
