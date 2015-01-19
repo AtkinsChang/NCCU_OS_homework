@@ -47,7 +47,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     /**
      * Lock held by take, poll, etc
      */
-    private final ReentrantLock takeLock = new ReentrantLock();
+    private final ReentrantLock takeLock = new ReentrantLock(Boolean.TRUE);
     /**
      * Wait queue for waiting takes
      */
@@ -55,7 +55,7 @@ public class OSProjectQueue<E> extends AbstractQueue<E> implements
     /**
      * Lock held by put, offer, etc
      */
-    private final ReentrantLock putLock = new ReentrantLock();
+    private final ReentrantLock putLock = new ReentrantLock(Boolean.TRUE);
     /**
      * Wait queue for waiting puts
      */

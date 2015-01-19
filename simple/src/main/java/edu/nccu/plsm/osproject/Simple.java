@@ -178,7 +178,7 @@ public class Simple {
                                     bits += "{END}";
                                     break;
                                 default:
-                                    bits += data[index];
+                                    bits += b & 0x1;
                                     data[index++] = b;
                                     if (index == data.length) {
                                         int sum = 0;
